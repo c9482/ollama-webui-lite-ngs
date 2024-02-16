@@ -7,6 +7,7 @@
 	import { info, models, settings } from "$lib/stores";
 	import { splitStream } from "$lib/utils";
 	import Advanced from "./Settings/Advanced.svelte";
+	import { env } from '$env/dynamic/public'
 
 	export let show = false;
 
@@ -48,7 +49,7 @@
 	let digest = "";
 	let pullProgress = null;
 
-	const checkOllamaConnection = async () => {
+	const checkOllamaConnection = async () => {		
 		if (API_BASE_URL === "") {
 			API_BASE_URL = OLLAMA_API_BASE_URL;
 		}
@@ -229,7 +230,16 @@
 				return null;
 			});
 		console.log(res);
-		models.push(...(res?.models ?? []));
+
+		const defaultModelNames = env.PUBLIC_DEFAULT_MODEL?.split(',') ?? "";
+		if(defaultModelNames != "") {
+    		models.push(...(res?.models.filter(model => defaultModelNames.includes(model.name)) ?? []));
+		}
+		else {
+			models.push(...(res?.models ?? []));
+		}
+
+		return models;
 	};
 
 	onMount(() => {
@@ -334,10 +344,10 @@
 				<button
 					class="px-2.5 py-2.5 min-w-fit rounded-lg flex-1 md:flex-none flex text-right transition {selectedTab ===
 					'models'
-						? 'bg-gray-200 dark:bg-gray-700'
+						? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed'
 						: ' hover:bg-gray-300 dark:hover:bg-gray-800'}"
 					on:click={() => {
-						selectedTab = "models";
+						//selectedTab = "models";
 					}}
 				>
 					<div class=" self-center mr-2">

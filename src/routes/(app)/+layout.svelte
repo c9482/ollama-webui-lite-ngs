@@ -10,6 +10,7 @@
 	import Sidebar from "$lib/components/layout/Sidebar.svelte";
 	import toast from "svelte-french-toast";
 	import { OLLAMA_API_BASE_URL } from "$lib/constants";
+	import { env } from '$env/dynamic/public'
 
 	let requiredOllamaVersion = "0.1.16";
 	let loaded = false;
@@ -37,7 +38,17 @@
 				return null;
 			});
 		console.log(res);
-		models.push(...(res?.models ?? []));
+
+		const defaultModelNames = env.PUBLIC_DEFAULT_MODEL?.split(',') ?? "";
+		if(defaultModelNames != "") {
+    		models.push(...(res?.models.filter(model => defaultModelNames.includes(model.name)) ?? []));
+			settings.set({ ...$settings, models: defaultModelNames });
+			localStorage.setItem("settings", JSON.stringify($settings));
+			toast.success("Default model updated to: " + defaultModelNames);
+		}
+		else {
+			models.push(...(res?.models ?? []));
+		}
 
 		return models;
 	};
@@ -116,7 +127,7 @@
 	};
 
 	const getOllamaVersion = async () => {
-		const res = await fetch(`${$settings?.API_BASE_URL ?? OLLAMA_API_BASE_URL}/version`, {
+		const res = await fetch(`${$settings?.API_BASE_URL ??  OLLAMA_API_BASE_URL}/version`, {
 			method: "GET",
 			headers: {
 				Accept: "application/json",
