@@ -1,6 +1,8 @@
 import adapter from "@sveltejs/adapter-static";
 import { vitePreprocess } from "@sveltejs/kit/vite";
 
+const OLLAMA_BASE_PATH = process.env.PUBLIC_OLLAMA_BASE_PATH || '';
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
@@ -15,7 +17,10 @@ const config = {
 			pages: "build",
 			assets: "build",
 			fallback: "index.html"
-		})
+		}),
+		paths: {
+            base: OLLAMA_BASE_PATH, // or '/app2' for the second app
+        },		
 	}
 };
 
